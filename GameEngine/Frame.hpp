@@ -18,6 +18,13 @@ using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock>;
 class Frame
 {
 public:
+	/// <summary>Create a frame</summary>
+	/// <param name='buffer'>Reference to screen buffer</param>
+	/// <param name='deviceContext'>Reference to device context</param>
+	/// <param name='width'>Frame width</param>
+	/// <param name='height'>Frame height</param>
+	/// <param name='times'>Reference to collection of frame times, for frame time statistics</param>
+	/// <remark>Create a frame object in a new scope before drawing each frame. End of scope will draw buffer to screen.</remark>
 	Frame(Buffer& buffer, HDC& deviceContext, int width, int height, std::vector<long long>& times) :
 		m_screenBuffer(buffer),
 		m_deviceContext(deviceContext),
@@ -61,9 +68,6 @@ private:
 			frameTime.push_back(elapsedTime.count());
 		}
 
-		// if (elapsedTime > MillisecondsPerFrame)
-		// {
-		// }
 		auto skippedFrame = elapsedTime / MillisecondsPerFrame;
 
 		std::stringstream str;

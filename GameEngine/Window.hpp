@@ -11,7 +11,6 @@ namespace GE
 constexpr int DefaultWindowWidth = 960;
 constexpr int DefaultWindowHeight = 640;
 
-
 LRESULT CALLBACK
 WndProc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -35,36 +34,51 @@ WndProc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
 class Window
 {
 public:
-	Window(HINSTANCE instance) : 
+	/// <summary>Create a window</summary>
+	/// <param name='instance'>Handle to program Instance</param>
+	Window(HINSTANCE instance) : Window(instance, DefaultWindowWidth, DefaultWindowHeight)
+	{
+	}
+
+	/// <summary>Create a window</summary>
+	/// <param name='instance'>Handle to program Instance</param>
+	/// <param name='width'>Width of window</param>
+	/// <param name='height'>Height of window</param>
+	Window(HINSTANCE instance, int width, int height) :
 		m_instance(instance),
-		m_width(DefaultWindowWidth),
-		m_height(DefaultWindowHeight),
-		m_handle(MakeMainWindow(WndProc)),
+		m_width(width),
+		m_height(height),
+		m_handle(makeMainWindow(WndProc)),
 		m_buffer(Buffer(m_width, m_height)),
 		m_dc(GetDC(m_handle))
 	{
 	}
 
+	/// <summary>Get the frame buffer of this window</summary>
 	const Buffer& FrameBuffer() const 
 	{ 
 		return m_buffer; 
 	}
 
+	/// <summary>Get the width of this window</summary>
 	int Width() const
 	{
 		return m_width;
 	}
 
+	/// <summary>Get the height of this window</summary>
 	int Height() const
 	{
 		return m_height;
 	}
 
+	/// <summary>Get the Device Context of this window</summary>
 	HDC DeviceContext() const
 	{
 		return m_dc;
 	}
 
+	/// <summary>Get the Window Handle of this window</summary>
 	HWND Handle() const
 	{
 		return m_handle;
@@ -78,7 +92,9 @@ private:
 	HDC m_dc;
 	HINSTANCE m_instance;
 
-	HWND MakeMainWindow(WNDPROC windowProc)
+	/// <summary>Create a new Window for displaying content</summary>
+	/// <param name='windowProc'>Window Proc function</param>
+	HWND makeMainWindow(WNDPROC windowProc)
 	{
 		m_instance = GetModuleHandle(nullptr);
 
@@ -121,9 +137,6 @@ private:
 
 		return windowHandle;
 	}
-
-
-
 };
 
 }

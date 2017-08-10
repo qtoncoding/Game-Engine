@@ -49,6 +49,10 @@ class Buffer
 	constexpr static int frameOffset = 50;
 
 public:
+	/// <summary>Create screen buffer</summary>
+	/// <param name='width'>Width of buffer</param>
+	/// <param name='height'>Height of buffer</param>
+	/// <exception>Can throw exception if out of memory for screen buffer</exception>
 	Buffer(int width, int height) :
 		m_width(width),
 		m_height(height)
@@ -63,23 +67,37 @@ public:
 		data = std::vector<Color>(m_width * m_height);
 	}
 
+
+	/// <summary>Get pointer to BitMap Info struct of screen buffer</summary>
 	BITMAPINFO* BMapInfoPtr() { return &info; }
+
+	/// <summary>Get pointer to screen buffer as c-array of uint32_t</summary>
 	uint32_t* Data() { return reinterpret_cast<uint32_t*>(data.data()); }
 
-	Color& at(int row, int col)
+	
+	/// <summary> Get reference to pixel at certain column and row</summary>
+	/// <param name='col'>Column of pixel</param> 
+	/// <param name='row'>Row of pixel</param>
+	/// <exception cref='std::invalid_argument'>Invalid Argument exception thrown when given invalid coordinate</exception>
+	Color& at(int col, int row)
 	{
-		if (row >= 0 && row < m_height &&
-			col >= 0 && col < m_width)
+		if (row >= 0 && row < m_width &&
+			col >= 0 && col < m_height)
 		{
 			return data[row + (col * m_width)];
 		}
 		else
 		{
-			throw std::invalid_argument("invalid pixel requested.");
+			throw std::invalid_argument("invalid pixel coordinate.");
 		}
 	}
 
-	void drawPixel(int x, int y, uint32_t color)
+	/// <summary>Draw pixel at given column and row with color</summary>
+	/// <param name='x'>Column of pixel</param> 
+	/// <param name='y'>Row of pixel</param>
+	/// <param name='color'>Color of pixel</param>
+	/// <remark>No-op when given invalid pixel coordinate</remark>
+	void DrawPixel(int x, int y, uint32_t color)
 	{
 		if (x >= 0 && x < m_width && y >= 0 && y < m_height)
 		{
@@ -91,7 +109,7 @@ public:
 	{
 		for (auto i = 0u; i < frameTime.size(); ++i)
 		{
-			drawPixel(i, static_cast<int>(frameTime[i]) + frameOffset, 0x00ffff00);
+			DrawPixel(i, static_cast<int>(frameTime[i]) + frameOffset, 0x00ffff00);
 		}
 	}
 
@@ -99,7 +117,7 @@ public:
 	{
 		for (auto i = 0; i < m_width; ++i)
 		{
-			drawPixel(i, targetFrameTime + frameOffset, 0x0000ff00);
+			DrawPixel(i, targetFrameTime + frameOffset, 0x0000ff00);
 		}
 	}
 
