@@ -47,6 +47,7 @@ class Buffer
 	int m_height;
 
 	constexpr static int frameOffset = 50;
+
 public:
 	Buffer(int width, int height) :
 		m_width(width),
@@ -65,11 +66,24 @@ public:
 	BITMAPINFO* BMapInfoPtr() { return &info; }
 	uint32_t* Data() { return reinterpret_cast<uint32_t*>(data.data()); }
 
+	Color& at(int row, int col)
+	{
+		if (row >= 0 && row < m_height &&
+			col >= 0 && col < m_width)
+		{
+			return data[row + (col * m_width)];
+		}
+		else
+		{
+			throw std::invalid_argument("invalid pixel requested.");
+		}
+	}
+
 	void drawPixel(int x, int y, uint32_t color)
 	{
 		if (x >= 0 && x < m_width && y >= 0 && y < m_height)
 		{
-			data[x + (y * m_width)] = color;
+			this->at(x, y) = color;
 		}
 	}
 
