@@ -143,11 +143,13 @@ public:
 		}
 	}
 
+	/// <summary>Return width of buffer</summary>
 	int Width() const
 	{
 		return m_width;
 	}
 
+	/// <summary>Return height of buffer</summary>
 	int Height() const
 	{
 		return m_height;

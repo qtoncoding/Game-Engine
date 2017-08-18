@@ -61,7 +61,7 @@ struct GameState
 		{
 			sprite.x = x * cellSize;
 			sprite.y = y * cellSize;
-			DrawRect<DrawType::Fill>(buffer, sprite, Color{ 0xffffffff });
+			DrawRect<DrawType::Fill>(buffer, sprite, Color{ 0x90ffffff });
 		}
 	};
 
@@ -87,17 +87,52 @@ struct GameState
 		Up,
 		Down,
 		Left,
-		Right
+		Right,
+		None
 	};
+
+	Direction currentDirection = Direction::None;
+
+	void movePlayer()
+	{
+		if (currentDirection != Direction::None)
+		{
+			playerBody.push_back(Node(playerHead));
+			std::rotate(std::begin(playerBody), std::prev(std::end(playerBody)), std::end(playerBody));
+		}
+
+		switch (currentDirection)
+		{
+		case Direction::Up:
+		{
+			playerHead.y += 1;
+		} break;
+
+		case Direction::Down:
+		{
+			playerHead.y -= 1;
+		} break;
+
+		case Direction::Left:
+		{
+			playerHead.x -= 1;
+		} break;
+
+		case Direction::Right:
+		{
+			playerHead.x += 1;
+		} break;
+
+		default:
+			break;
+		}
+		currentDirection = Direction::None;
+	}
 
 	void processInput()
 	{
 		if (!inputs.empty())
 		{
-			playerBody.push_back(Node(playerHead));
-			std::rotate(std::begin(playerBody), std::prev(std::end(playerBody)), std::end(playerBody));
-
-			Direction currentDirection = Direction::Up;
 			for (auto& input : inputs)
 			{
 				switch (input)
@@ -126,38 +161,13 @@ struct GameState
 					break;
 				}
 			}
-
-			switch (currentDirection)
-			{
-			case Direction::Up:
-			{
-				playerHead.y += 1;
-			} break;
-
-			case Direction::Down:
-			{
-				playerHead.y -= 1;
-			} break;
-
-			case Direction::Left:
-			{
-				playerHead.x -= 1;
-			} break;
-
-			case Direction::Right:
-			{
-				playerHead.x += 1;
-			} break;
-
-			default:
-				break;
-			}
 		}
 	}
 
 	void update()
 	{
 		processInput();
+		movePlayer();
 	}
 };
 
