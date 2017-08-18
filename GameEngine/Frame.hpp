@@ -68,8 +68,6 @@ private:
 			frameTime.push_back(elapsedTime.count());
 		}
 
-		auto skippedFrame = elapsedTime / MillisecondsPerFrame;
-
 		std::stringstream str;
 		str << "Drawing took: " << elapsedTime.count() << "ms\n";
 		OutputDebugString(str.str().c_str());

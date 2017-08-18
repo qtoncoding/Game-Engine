@@ -15,8 +15,18 @@ constexpr static auto FPS = 30;
 constexpr static auto MillisecondsPerFrame = std::chrono::milliseconds(static_cast<int>(1000.0 / FPS));
 static bool Running = true;
 
+enum class KeyInput
+{
+	Up, 
+	Down,
+	Left,
+	Right,
+	None
+};
+
 struct GameState
 {
+	std::vector<KeyInput> inputs;
 };
 
 
@@ -35,26 +45,59 @@ WinMain(HINSTANCE Instance,
 	auto height = window.Height();
 
 	std::vector<long long> frameTime(width);
-	//GameState game;
+	GameState game;
 
 	auto lastRenderTime = std::chrono::high_resolution_clock::now();
 
 	while (Running)
 	{
+		game.inputs.clear();
 		MSG msg;
 		while (PeekMessage(&msg, windowHandle, 0, 0, PM_REMOVE))
 		{
 			switch (msg.message)
 			{
-			case WM_KEYDOWN:
-			{
-				OutputDebugString("KeyDown!\n");
-			} break;
-			default:
-			{
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
-			} break;
+				case WM_KEYDOWN:
+				{
+					OutputDebugString("KeyDown!\n");
+					KeyInput currentInput = KeyInput::None;
+					switch (msg.wParam)
+					{
+						case VK_UP:
+						{
+							currentInput = KeyInput::Up;
+						} break;
+
+						case VK_DOWN:
+						{
+							currentInput = KeyInput::Down;
+						} break;
+						
+						case VK_LEFT:
+						{
+							currentInput = KeyInput::Left;
+						} break;
+						
+						case VK_RIGHT:
+						{
+							currentInput = KeyInput::Right;
+						} break;
+
+						default:
+							break;
+					}
+
+					if (currentInput != KeyInput::None)
+					{
+						game.inputs.push_back(currentInput);
+					}
+				} break;
+
+				default:
+				{
+					TranslateMessage(&msg);
+					DispatchMessage(&msg);
+				} break;
 			}
 		}
 
