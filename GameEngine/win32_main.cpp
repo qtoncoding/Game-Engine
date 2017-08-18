@@ -215,6 +215,10 @@ WinMain(HINSTANCE Instance,
 							currentInput = KeyInput::Right;
 						} break;
 
+						case VK_ESCAPE:
+						{
+							Running = false;
+						} break;
 						default:
 							break;
 					}
