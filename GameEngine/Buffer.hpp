@@ -81,10 +81,10 @@ public:
 	/// <exception cref='std::invalid_argument'>Invalid Argument exception thrown when given invalid coordinate</exception>
 	Color& at(int col, int row)
 	{
-		if (row >= 0 && row < m_width &&
-			col >= 0 && col < m_height)
+		if (col >= 0 && col < m_width &&
+			row >= 0 && row < m_height)
 		{
-			return data[row + (col * m_width)];
+			return data[col + (row * m_width)];
 		}
 		else
 		{
@@ -97,7 +97,7 @@ public:
 	/// <param name='y'>Row of pixel</param>
 	/// <param name='color'>Color of pixel</param>
 	/// <remark>No-op when given invalid pixel coordinate</remark>
-	void DrawPixel(int x, int y, uint32_t color)
+	void DrawPixel(int x, int y, Color color)
 	{
 		if (x >= 0 && x < m_width && y >= 0 && y < m_height)
 		{
@@ -105,11 +105,16 @@ public:
 		}
 	}
 
+	void DrawLine(int x1, int y1, int x2, int y2, Color color)
+	{
+
+	}
+
 	void DrawFrameTime(std::vector<long long>& frameTime)
 	{
 		for (auto i = 0u; i < frameTime.size(); ++i)
 		{
-			DrawPixel(i, static_cast<int>(frameTime[i]) + frameOffset, 0x00ffff00);
+			DrawPixel(i, static_cast<int>(frameTime[i]) + frameOffset, Color{ 0x00ffff00 });
 		}
 	}
 
@@ -117,13 +122,13 @@ public:
 	{
 		for (auto i = 0; i < m_width; ++i)
 		{
-			DrawPixel(i, targetFrameTime + frameOffset, 0x0000ff00);
+			DrawPixel(i, targetFrameTime + frameOffset, Color{ 0x0000ff00 });
 		}
 	}
 
 	void FillFrame()
 	{
-		std::fill(std::begin(data), std::end(data), 0x00000000);
+		std::fill(std::begin(data), std::end(data), Color{ 0x00000000 });
 	}
 };
 
