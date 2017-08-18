@@ -49,9 +49,12 @@ public:
 		m_width(width),
 		m_height(height),
 		m_handle(makeMainWindow(WndProc)),
-		m_buffer(Buffer(m_width, m_height)),
 		m_dc(GetDC(m_handle))
 	{
+		RECT clientRect;
+		GetClientRect(m_handle, &clientRect);
+
+		m_buffer = Buffer(clientRect.right - clientRect.left, clientRect.bottom - clientRect.top);
 	}
 
 	/// <summary>Get the frame buffer of this window</summary>
@@ -120,8 +123,8 @@ private:
 										   WS_OVERLAPPEDWINDOW,
 										   CW_USEDEFAULT,
 										   CW_USEDEFAULT,
-										   CW_USEDEFAULT,
-										   CW_USEDEFAULT,
+										   m_width,
+										   m_height,
 										   nullptr,
 										   nullptr,
 										   m_instance,
