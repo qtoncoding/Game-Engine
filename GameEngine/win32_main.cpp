@@ -267,7 +267,7 @@ WinMain(HINSTANCE Instance,
 			// Draw game
 			game.draw(buffer);
 
-			// Draw debug framerate
+			// Draw debug frametime
 			buffer.DrawTargetFrameTime(33);
 			buffer.DrawFrameTime(frameTime);
 			lastRenderTime = std::chrono::high_resolution_clock::now();
