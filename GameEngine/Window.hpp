@@ -25,7 +25,6 @@ WndProc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
 		return 0;
 	} break;
 	case WM_CLOSE:
-		[[fallthrough]]
 	default:
 		return DefWindowProc(handle, message, wParam, lParam);
 	}
