@@ -167,6 +167,9 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Buffer.cpp" />
+    <ClCompile Include="Color.cpp" />
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="win32_main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -174,6 +177,11 @@
     <None Include="Frame.hpp" />
     <None Include="packages.config" />
     <None Include="Window.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Color.h" />
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="Shapes.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

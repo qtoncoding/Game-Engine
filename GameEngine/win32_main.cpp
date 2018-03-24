@@ -3,11 +3,10 @@
 #include <Windows.h>
 #endif
 
-#include <mutex>
-
 #include "Window.hpp"
 #include "Frame.hpp"
 #include "Buffer.hpp"
+#include "Game.h"
 
 using namespace GE;
 
@@ -17,160 +16,67 @@ constexpr static auto FPS = 30;
 constexpr static auto MillisecondsPerFrame = std::chrono::milliseconds(static_cast<int>(1000.0 / FPS));
 static bool Running = true;
 
-enum class KeyInput
+void ProcessInput(MSG const& msg, GameState& game)
 {
-	Up, 
-	Down,
-	Left,
-	Right,
-	None
-};
+	OutputDebugString("KeyDown!\n");
+	KeyInput currentInput = KeyInput::None;
+	switch (msg.wParam)
+	{
+	case VK_UP:
+	{
+		currentInput = KeyInput::Up;
+	} break;
 
-struct GameState
+	case VK_DOWN:
+	{
+		currentInput = KeyInput::Down;
+	} break;
+
+	case VK_LEFT:
+	{
+		currentInput = KeyInput::Left;
+	} break;
+
+	case VK_RIGHT:
+	{
+		currentInput = KeyInput::Right;
+	} break;
+
+	case VK_ESCAPE:
+	{
+		Running = false;
+	} break;
+
+	default:
+		break;
+	}
+
+	if (currentInput != KeyInput::None)
+	{
+		game.AddInput(currentInput);
+	}
+}
+
+void ProcessWindowMessage(HWND& windowHandle, GameState& game)
 {
-	std::vector<KeyInput> inputs;
-	static const int cellSize = 50;
-	static const int rows = 12;
-	static const int cols = 19;
-
-	GameState()
+	MSG msg;
+	while (PeekMessage(&msg, windowHandle, 0, 0, PM_REMOVE))
 	{
-		makeBoard();
-	}
-
-	std::vector<Rect> boardGrid;
-	void makeBoard()
-	{
-		for (auto i = 0; i < rows; ++i)
+		switch (msg.message)
 		{
-			boardGrid.emplace_back(Rect{ 0, i*cellSize, 1000, 2 });
-		}
-
-		for (auto i = 0; i < cols; ++i)
+		case WM_KEYDOWN:
 		{
-			boardGrid.emplace_back(Rect{ i*cellSize, 0, 2, 1000 });
-		}
-	}
-
-	struct Node
-	{
-		int x = 5;
-		int y = 5;
-		Rect sprite{ x * cellSize, y * cellSize, cellSize, cellSize };
-		void draw(Buffer& buffer)
-		{
-			sprite.x = x * cellSize;
-			sprite.y = y * cellSize;
-			DrawRect<DrawType::Fill>(buffer, sprite, Color{ 0x90ffffff });
-		}
-	};
-
-	Node playerHead;
-	std::vector<Node> playerBody;
-
-	void draw(Buffer& buffer)
-	{
-		for (auto& g : boardGrid)
-		{
-			DrawRect<DrawType::Fill>(buffer, g, Color{ 0xffffffff });
-		}
-
-		playerHead.draw(buffer);
-		for (auto& b : playerBody)
-		{
-			b.draw(buffer);
-		}
-	}
-
-	enum class Direction
-	{
-		Up,
-		Down,
-		Left,
-		Right,
-		None
-	};
-
-	Direction currentDirection = Direction::None;
-
-	void movePlayer()
-	{
-		if (currentDirection != Direction::None)
-		{
-			playerBody.push_back(Node(playerHead));
-			std::rotate(std::begin(playerBody), std::prev(std::end(playerBody)), std::end(playerBody));
-		}
-
-		switch (currentDirection)
-		{
-		case Direction::Up:
-		{
-			playerHead.y += 1;
-		} break;
-
-		case Direction::Down:
-		{
-			playerHead.y -= 1;
-		} break;
-
-		case Direction::Left:
-		{
-			playerHead.x -= 1;
-		} break;
-
-		case Direction::Right:
-		{
-			playerHead.x += 1;
+			ProcessInput(msg, game);
 		} break;
 
 		default:
-			break;
-		}
-		currentDirection = Direction::None;
-	}
-
-	void processInput()
-	{
-		if (!inputs.empty())
 		{
-			for (auto& input : inputs)
-			{
-				switch (input)
-				{
-				case KeyInput::Up:
-				{
-					currentDirection = Direction::Up;
-				} break;
-
-				case KeyInput::Down:
-				{
-					currentDirection = Direction::Down;
-				} break;
-
-				case KeyInput::Left:
-				{
-					currentDirection = Direction::Left;
-				} break;
-
-				case KeyInput::Right:
-				{
-					currentDirection = Direction::Right;
-				} break;
-
-				default:
-					break;
-				}
-			}
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		} break;
 		}
 	}
-
-	void update()
-	{
-		processInput();
-		movePlayer();
-	}
-};
-
+}
 
 int CALLBACK 
 WinMain(HINSTANCE Instance,
@@ -187,91 +93,28 @@ WinMain(HINSTANCE Instance,
 
 	std::vector<long long> frameTime(width);
 	GameState game;
-	game.makeBoard();
 
 	auto lastRenderTime = std::chrono::high_resolution_clock::now();
 
 	while (Running)
 	{
-		game.inputs.clear();
-		MSG msg;
-		while (PeekMessage(&msg, windowHandle, 0, 0, PM_REMOVE))
-		{
-			switch (msg.message)
-			{
-				case WM_KEYDOWN:
-				{
-					OutputDebugString("KeyDown!\n");
-					KeyInput currentInput = KeyInput::None;
-					switch (msg.wParam)
-					{
-						case VK_UP:
-						{
-							currentInput = KeyInput::Up;
-						} break;
+		game.ClearInput();
 
-						case VK_DOWN:
-						{
-							currentInput = KeyInput::Down;
-						} break;
-						
-						case VK_LEFT:
-						{
-							currentInput = KeyInput::Left;
-						} break;
-						
-						case VK_RIGHT:
-						{
-							currentInput = KeyInput::Right;
-						} break;
-
-						case VK_ESCAPE:
-						{
-							Running = false;
-						} break;
-						default:
-							break;
-					}
-
-					if (currentInput != KeyInput::None)
-					{
-						game.inputs.push_back(currentInput);
-					}
-				} break;
-
-				default:
-				{
-					TranslateMessage(&msg);
-					DispatchMessage(&msg);
-				} break;
-			}
-		}
-
+		ProcessWindowMessage(windowHandle, game);
+		
 		// Do game update
-		game.update();
+		game.Update();
+	
+		GE::Frame frame(buffer, deviceContext, buffer.Width(), buffer.Height(), frameTime);
 
-		auto currentTime = std::chrono::high_resolution_clock::now();
-		auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastRenderTime);
-		if (elapsedTime >= MillisecondsPerFrame)
-		{
-			std::stringstream str;
-			str << "Elapsed time: " << elapsedTime.count() << "ms Target time: " << MillisecondsPerFrame.count() << "ms\n";
-			OutputDebugString(str.str().c_str());
-
-			GE::Frame frame(buffer, deviceContext, buffer.Width(), buffer.Height(), frameTime);
-			// Draw
-
-			// Clear bg
-			buffer.FillFrame();
-
-			// Draw game
-			game.draw(buffer);
-
-			// Draw debug frametime
-			buffer.DrawTargetFrameTime(33);
-			buffer.DrawFrameTime(frameTime);
-			lastRenderTime = std::chrono::high_resolution_clock::now();
-		}
+		// Draw
+		// Clear bg
+		buffer.FillFrame();
+		// Draw game
+		game.Draw(buffer);
+		// Draw debug frametime
+		buffer.DrawTargetFrameTime(33);
+		buffer.DrawFrameTime(frameTime);
 	}
 
 	return 0;
