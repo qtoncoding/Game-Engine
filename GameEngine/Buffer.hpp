@@ -6,9 +6,6 @@
 
 #include <algorithm>
 #include <vector>
-#include <iostream>
-#include <string>
-#include <fstream>
 
 namespace GE
 {
@@ -158,50 +155,12 @@ public:
 		return m_height;
 	}
 
-	void DrawLine(int x1, int y1, int x2, int y2, Color color)
+	// TODO(Nhung): Implement draw line
+	/*void DrawLine(int x1, int y1, int x2, int y2, Color color)
 	{
-		int startX = (x1 <= x2)? x1 : x2;
-		int endX = (x1 <= x2)? x2 : x1;
-		int startY = (y1 <= y2)? y1 : y2;
-		int endY = (y1 <= y2) ? y2 : y1;
-		
-		float deltaY = static_cast<float> (endY - startY);
-		float deltaX = static_cast<float> (endX - startX);
 
-		float slope = deltaX / deltaY;
-		if (slope > 1) {
-			slope = deltaY / deltaX;
-			float currY = static_cast<float>(startY);
-			for (int x = startX; x <= endX; x++) {
-				auto y = static_cast<int>(std::round(currY));
-				DrawPixel(x, y, color);
-				currY += slope;	
-			}
+	}*/
 
-		}
-		else {
-			float currX = static_cast<float>(startX);
-			for (int y = startY; y <= endY; y++) {
-				auto x = static_cast<int>(std::round(currX));
-				DrawPixel(x, y, color);
-				currX += slope;
-			}
-		}
-	}
-
-	void DrawImage(std::string fileName) {
-		int headerSize = 8;
-		std::ifstream fileStream(fileName);
-		//skip over header
-		fileStream.seekg(headerSize);
-		//use unique pointer no memory deallocation required
-		//chunk length is 4 bytes
-		auto chunkLength = std::make_unique<char[]>(4);
-		fileStream.read(chunkLength.get(), 4);
-		//skip over chunk type
-		fileStream.seekg(4);
-	}
-	
 	void DrawFrameTime(std::vector<long long>& frameTime)
 	{
 		for (auto i = 0u; i < frameTime.size(); ++i)

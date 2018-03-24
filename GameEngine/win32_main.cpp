@@ -14,7 +14,7 @@ using namespace GE;
 using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
 constexpr static auto FPS = 30;
-constexpr static auto MillisecondsPerFrame = std::chrono::milliseconds(/*static_cast<int>(1000.0 / FPS)*/0);
+constexpr static auto MillisecondsPerFrame = std::chrono::milliseconds(static_cast<int>(1000.0 / FPS));
 static bool Running = true;
 
 enum class KeyInput
@@ -70,34 +70,16 @@ struct GameState
 
 	void draw(Buffer& buffer)
 	{
-		// StopWatch watch;
-		// Stopwatch.Out (message)
-		// Message + time + ms
-
-
-		auto beforeGrid = std::chrono::high_resolution_clock::now();
 		for (auto& g : boardGrid)
 		{
 			DrawRect<DrawType::Fill>(buffer, g, Color{ 0xffffffff });
 		}
-		auto gridTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - beforeGrid);
 
-		std::stringstream str;
-		str << "Grid Draw time: " << gridTime.count() << "ms\n";
-		OutputDebugString(str.str().c_str());
-
-		auto beforePlayer = std::chrono::high_resolution_clock::now();
 		playerHead.draw(buffer);
 		for (auto& b : playerBody)
 		{
 			b.draw(buffer);
 		}
-		auto playerTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - beforePlayer);
-
-		str.clear();
-		str << "Player Draw time: " << playerTime.count() << "ms\n";
-		OutputDebugString(str.str().c_str());
-
 	}
 
 	enum class Direction
@@ -197,129 +179,100 @@ WinMain(HINSTANCE Instance,
 		int)
 {
 	GE::Window window(Instance);
+
+	auto buffer = window.FrameBuffer();
 	auto deviceContext = window.DeviceContext();
-	auto buffer = window.FrameBuffer(); 
+	auto windowHandle = window.Handle();
 	auto width = buffer.Width();
+
 	std::vector<long long> frameTime(width);
+	GameState game;
+	game.makeBoard();
 
-	while (true) {
-		GE::Frame frame(buffer, deviceContext, buffer.Width(), buffer.Height(), frameTime);
-		buffer.DrawImage("flappyModel.png");
+	auto lastRenderTime = std::chrono::high_resolution_clock::now();
+
+	while (Running)
+	{
+		game.inputs.clear();
+		MSG msg;
+		while (PeekMessage(&msg, windowHandle, 0, 0, PM_REMOVE))
+		{
+			switch (msg.message)
+			{
+				case WM_KEYDOWN:
+				{
+					OutputDebugString("KeyDown!\n");
+					KeyInput currentInput = KeyInput::None;
+					switch (msg.wParam)
+					{
+						case VK_UP:
+						{
+							currentInput = KeyInput::Up;
+						} break;
+
+						case VK_DOWN:
+						{
+							currentInput = KeyInput::Down;
+						} break;
+						
+						case VK_LEFT:
+						{
+							currentInput = KeyInput::Left;
+						} break;
+						
+						case VK_RIGHT:
+						{
+							currentInput = KeyInput::Right;
+						} break;
+
+						case VK_ESCAPE:
+						{
+							Running = false;
+						} break;
+						default:
+							break;
+					}
+
+					if (currentInput != KeyInput::None)
+					{
+						game.inputs.push_back(currentInput);
+					}
+				} break;
+
+				default:
+				{
+					TranslateMessage(&msg);
+					DispatchMessage(&msg);
+				} break;
+			}
+		}
+
+		// Do game update
+		game.update();
+
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastRenderTime);
+		if (elapsedTime >= MillisecondsPerFrame)
+		{
+			std::stringstream str;
+			str << "Elapsed time: " << elapsedTime.count() << "ms Target time: " << MillisecondsPerFrame.count() << "ms\n";
+			OutputDebugString(str.str().c_str());
+
+			GE::Frame frame(buffer, deviceContext, buffer.Width(), buffer.Height(), frameTime);
+			// Draw
+
+			// Clear bg
+			buffer.FillFrame();
+
+			// Draw game
+			game.draw(buffer);
+
+			// Draw debug frametime
+			buffer.DrawTargetFrameTime(33);
+			buffer.DrawFrameTime(frameTime);
+			lastRenderTime = std::chrono::high_resolution_clock::now();
+		}
 	}
-	
-
-	//GameState game;
-	//game.makeBoard();
-
-	//auto lastRenderTime = std::chrono::high_resolution_clock::now();
-
-	//while (Running)
-	//{
-	//	game.inputs.clear();
-	//	MSG msg;
-	//	while (PeekMessage(&msg, windowHandle, 0, 0, PM_REMOVE))
-	//	{
-	//		switch (msg.message)
-	//		{
-	//			case WM_KEYDOWN:
-	//			{
-	//				OutputDebugString("KeyDown!\n");
-	//				KeyInput currentInput = KeyInput::None;
-	//				switch (msg.wParam)
-	//				{
-	//					case VK_UP:
-	//					{
-	//						currentInput = KeyInput::Up;
-	//					} break;
-
-	//					case VK_DOWN:
-	//					{
-	//						currentInput = KeyInput::Down;
-	//					} break;
-	//					
-	//					case VK_LEFT:
-	//					{
-	//						currentInput = KeyInput::Left;
-	//					} break;
-	//					
-	//					case VK_RIGHT:
-	//					{
-	//						currentInput = KeyInput::Right;
-	//					} break;
-
-	//					case VK_ESCAPE:
-	//					{
-	//						Running = false;
-	//					} break;
-	//					default:
-	//						break;
-	//				}
-
-	//				if (currentInput != KeyInput::None)
-	//				{
-	//					game.inputs.push_back(currentInput);
-	//				}
-	//			} break;
-
-	//			default:
-	//			{
-	//				TranslateMessage(&msg);
-	//				DispatchMessage(&msg);
-	//			} break;
-	//		}
-	//	}
-
-	//	// Do game update
-	//	game.update();
-
-	//	auto currentTime = std::chrono::high_resolution_clock::now();
-	//	auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastRenderTime);
-	//	if (elapsedTime >= MillisecondsPerFrame)
-	//	{
-	//		std::stringstream str;
-	//		str << "Elapsed time: " << elapsedTime.count() << "ms Target time: " << MillisecondsPerFrame.count() << "ms\n";
-	//		OutputDebugString(str.str().c_str());
-
-	//		GE::Frame frame(buffer, deviceContext, buffer.Width(), buffer.Height(), frameTime);
-	//		// Draw
-
-	//		// Clear bg
-	//		auto beforeClearFrame = std::chrono::high_resolution_clock::now();
-	//		buffer.FillFrame();
-	//		auto clearFrameTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - beforeClearFrame);
-	//		
-	//		str.clear();
-	//		str << "Clear frame time: " << clearFrameTime.count() << "ms\n";
-	//		OutputDebugString(str.str().c_str());
-	//		
-	//		// Draw game
-	//		auto beforeGameDraw = std::chrono::high_resolution_clock::now();
-	//		game.draw(buffer);
-	//		auto gameDrawTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - beforeGameDraw);
-
-	//		str.clear();
-	//		str << "Game draw time: " << gameDrawTime.count() << "ms\n";
-	//		OutputDebugString(str.str().c_str());
-
-	//		// Draw debug frametime
-	//		auto beforeDebugDraw = std::chrono::high_resolution_clock::now();
-	//		buffer.DrawTargetFrameTime(33);
-	//		buffer.DrawFrameTime(frameTime);
-	//		auto debugDrawTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - beforeGameDraw);
-
-	//		str.clear();
-	//		str << "debug draw time: " << debugDrawTime.count() << "ms\n";
-	//		OutputDebugString(str.str().c_str());
-
-
-	//		lastRenderTime = std::chrono::high_resolution_clock::now();
-
-	//		str.clear();
-	//		str << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
-	//		OutputDebugString(str.str().c_str());
-
-	//	}
-	//}
 
 	return 0;
 }
