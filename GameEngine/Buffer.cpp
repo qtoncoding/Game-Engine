@@ -101,3 +101,34 @@ void GE::Buffer::FillFrame()
 {
 	std::fill(std::begin(data), std::end(data), Color{ 0x00000000 });
 }
+
+void GE::Buffer::DrawLine(int x1, int y1, int x2, int y2, Color color)
+{
+	int startX = (x1 <= x2) ? x1 : x2;
+	int endX = (x1 <= x2) ? x2 : x1;
+	int startY = (y1 <= y2) ? y1 : y2;
+	int endY = (y1 <= y2) ? y2 : y1;
+
+	float deltaY = static_cast<float> (endY - startY);
+	float deltaX = static_cast<float> (endX - startX);
+
+	float slope = deltaX / deltaY;
+	if (slope > 1) {
+		slope = deltaY / deltaX;
+		float currY = static_cast<float>(startY);
+		for (int x = startX; x <= endX; x++) {
+			auto y = static_cast<int>(std::round(currY));
+			DrawPixel(x, y, color);
+			currY += slope;
+		}
+
+	}
+	else {
+		float currX = static_cast<float>(startX);
+		for (int y = startY; y <= endY; y++) {
+			auto x = static_cast<int>(std::round(currX));
+			DrawPixel(x, y, color);
+			currX += slope;
+		}
+	}
+}

@@ -80,6 +80,7 @@ public:
 	void DrawFrameTime(std::vector<long long>& frameTime);
 	void DrawTargetFrameTime(int targetFrameTime);
 	void FillFrame();
+	void DrawLine(int x1, int y1, int x2, int y2, Color color);
 };
 
 };
@@ -110,3 +111,4 @@ void DrawRect(GE::Buffer& buffer, const Rect& rect, Color fillColor, [[maybe_unu
 
 	Impl::drawRectInternal(buffer, innerRect, innerColor);
 }
+
