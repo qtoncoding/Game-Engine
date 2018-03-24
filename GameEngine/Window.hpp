@@ -10,7 +10,6 @@ namespace GE
 {
 constexpr int DefaultWindowWidth = 960;
 constexpr int DefaultWindowHeight = 640;
-
 LRESULT CALLBACK
 WndProc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -25,7 +24,7 @@ WndProc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
 		return 0;
 	} break;
 	case WM_CLOSE:
-		[[fallthrough]]
+		//[[fallthrough]]
 	default:
 		return DefWindowProc(handle, message, wParam, lParam);
 	}
