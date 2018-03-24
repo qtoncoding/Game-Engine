@@ -92,29 +92,19 @@ WinMain(HINSTANCE Instance,
 	auto width = buffer.Width();
 
 	std::vector<long long> frameTime(width);
-	GameState game;
 
 	auto lastRenderTime = std::chrono::high_resolution_clock::now();
-
+	GameState game;
 	while (Running)
 	{
-		game.ClearInput();
-
 		ProcessWindowMessage(windowHandle, game);
-		
-		// Do game update
-		game.Update();
-	
+
 		GE::Frame frame(buffer, deviceContext, buffer.Width(), buffer.Height(), frameTime);
 
-		// Draw
-		// Clear bg
-		buffer.FillFrame();
-		// Draw game
-		game.Draw(buffer);
-		// Draw debug frametime
-		buffer.DrawTargetFrameTime(33);
-		buffer.DrawFrameTime(frameTime);
+		buffer.DrawGradient();
+
+		/*buffer.DrawTargetFrameTime(33);
+		buffer.DrawFrameTime(frameTime);*/
 	}
 
 	return 0;

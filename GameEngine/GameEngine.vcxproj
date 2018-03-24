@@ -179,9 +179,18 @@
     <None Include="Window.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="HitableList.h" />
+    <ClInclude Include="IMaterial.h" />
+    <ClInclude Include="Lambertian.h" />
+    <ClInclude Include="Metal.h" />
+    <ClInclude Include="Ray.h" />
+    <ClInclude Include="IRayHitable.h" />
     <ClInclude Include="Shapes.h" />
+    <ClInclude Include="Sphere.h" />
+    <ClInclude Include="Vec3.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

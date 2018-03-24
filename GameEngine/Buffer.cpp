@@ -1,4 +1,12 @@
+#define NOMINMAX
 #include "Buffer.hpp"
+#include <cmath>
+#include "Sphere.h"
+#include <numeric>
+#include "Camera.h"
+#include "IMaterial.h"
+#include "Metal.h"
+#include "Lambertian.h"
 
 void Impl::drawRectInternal(GE::Buffer & buffer, const Rect & rect, Color fillColor)
 {
@@ -100,4 +108,67 @@ void GE::Buffer::DrawTargetFrameTime(int targetFrameTime)
 void GE::Buffer::FillFrame()
 {
 	std::fill(std::begin(data), std::end(data), Color{ 0x00000000 });
+}
+
+Vec3F trace(Ray const& r, RayHitableList const& world, int depth)
+{
+	HitRecord rec{};
+	if (world.hit(r, 0.00001f, std::numeric_limits<float>::max(), rec))
+	{
+		if (depth < 50)
+		{
+			auto [scatter, attenuation, scattered] = rec.mat->scatter(r, rec);
+			if (scatter)
+			{
+				return attenuation * trace(scattered, world, depth + 1);
+			}
+		}
+		return Vec3F(0, 0, 0);
+	}
+	else
+	{
+		auto unitDirection = UnitVector(r.Direction());
+		auto t = 0.5f * (unitDirection.y() + 1.0f);
+		return (1.0f - t)*Vec3F(1.0f, 1.0f, 1.0f) + t * Vec3F(0.7f, 0.7f, 1.0f);
+	}
+}
+
+void GE::Buffer::DrawGradient()
+{
+	Camera camera;
+
+	IRayHitableVector spheres;
+	spheres.push_back(std::make_unique<Sphere>(Vec3F(0, 0, 1), 0.5f, std::make_unique<Lambertian>(Vec3F(0.3f, 0.3f, 0.8f))));
+	spheres.push_back(std::make_unique<Sphere>(Vec3F(1, 0, 1), 0.5f, std::make_unique<Metal>(Vec3F(0.8f, 0.6f, 0.8f))));
+	spheres.push_back(std::make_unique<Sphere>(Vec3F(-1, 0, 1), 0.5f, std::make_unique<Metal>(Vec3F(0.8f, 0.8f, 0.8f))));
+	spheres.push_back(std::make_unique<Sphere>(Vec3F(0, -100.5, 1), 100.0f, std::make_unique<Lambertian>(Vec3F(0.6f, 0.6f, 0.0f))));
+
+	RayHitableList world(std::move(spheres));
+	
+	int tries = 10;
+	for (auto y = Height(); y >= 0; --y)
+	{
+		for (auto x = 0; x < Width(); ++x)
+		{
+			Vec3F col(0, 0, 0);
+			for (auto i = 0; i < tries; ++i)
+			{
+				float u = (x + dist(ranDevice)) / static_cast<float>(Width());
+				float v = (y + dist(ranDevice)) / static_cast<float>(Height());
+				Ray r = camera.GetRay(u, v);
+				col += trace(r, world, 0);
+
+			}
+			col /= static_cast<float>(tries);
+
+			/*float u = static_cast<float>(x) / static_cast<float>(Width());
+			float v = static_cast<float>(y) / static_cast<float>(Height());
+			Ray r = camera.GetRay(u, v);
+			auto col = trace(r, world, 0);
+			*/
+
+			col = Vec3F(std::sqrt(col[0]), std::sqrt(col[1]), std::sqrt(col[2]));
+			DrawPixel(x, y, Color(col.x(), col.y(), col.z()));
+		}
+	}
 }

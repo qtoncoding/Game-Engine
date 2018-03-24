@@ -7,6 +7,7 @@ class Color
 public:
 	Color(uint32_t color);
 	Color(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha = 255);
+	Color(float red, float green, float blue, float alpha = 1.0);
 	Color& operator=(uint32_t color);
 
 	Color() = default;

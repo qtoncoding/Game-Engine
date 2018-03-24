@@ -7,9 +7,12 @@
 #include <algorithm>
 #include <vector>
 #include <variant>
-
+#include <random>
 #include "Shapes.h"
 #include "Color.h"
+#include "Vec3.h"
+#include "Ray.h"
+#include "HitableList.h"
 
 
 enum class DrawType : uint8_t
@@ -34,6 +37,8 @@ class Buffer
 	int m_height;
 	constexpr static int frameOffset = 80;
 
+	std::default_random_engine ranDevice;
+	std::uniform_real_distribution<float> dist;
 public:
 	Buffer() {}
 	/// <summary>Create screen buffer</summary>
@@ -80,6 +85,7 @@ public:
 	void DrawFrameTime(std::vector<long long>& frameTime);
 	void DrawTargetFrameTime(int targetFrameTime);
 	void FillFrame();
+	void DrawGradient();
 };
 
 };
