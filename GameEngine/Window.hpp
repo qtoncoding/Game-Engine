@@ -8,8 +8,8 @@
 
 namespace GE
 {
-constexpr int DefaultWindowWidth = 960/2;
-constexpr int DefaultWindowHeight = 640/2;
+constexpr int DefaultWindowWidth = 1200;
+constexpr int DefaultWindowHeight = 800;
 
 LRESULT CALLBACK
 WndProc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)

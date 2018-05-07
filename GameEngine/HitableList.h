@@ -10,11 +10,11 @@ class RayHitableList : public IRayHitable
 {
 public:
 	RayHitableList(IRayHitableVector&& v) : objects(std::move(v)) {}
-	bool hit(Ray const& r, float tMin, float tMax, HitRecord& rec) const override 
+	bool hit(Ray const& r, double tMin, double tMax, HitRecord& rec) const override 
 	{
 		HitRecord tempRec;
 		bool hitAnything = false;
-		float closest = tMax;
+		double closest = tMax;
 		for (auto& o : objects)
 		{
 			if (o->hit(r, tMin, closest, tempRec))

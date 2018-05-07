@@ -13,7 +13,7 @@ Color::Color(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 	color.alpha = a;
 }
 
-Color::Color(float red, float green, float blue, float alpha)
+Color::Color(double red, double green, double blue, double alpha)
 {
 	color.red =   static_cast<unsigned char>(static_cast<int>(255.99 * red));
 	color.green = static_cast<unsigned char>(static_cast<int>(255.99 * green));

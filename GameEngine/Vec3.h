@@ -86,10 +86,10 @@ public:
 
 	// Vector ops
 	inline T SquaredLength() const { return e[0] * e[0] + e[1] * e[1] + e[2] * e[2]; }
-	inline T Length() const { return std::sqrt(squared_length()); }
+	inline T Length() const { return std::sqrt(SquaredLength()); }
 	inline void MakeUnitVector() 
 	{
-		T k = 1.0f / SquaredLength();
+		T k = 1.0f / Length();
 		e[0] *= k;
 		e[1] *= k;
 		e[2] *= k;
@@ -191,10 +191,11 @@ Vec3<T> cross(Vec3<T> const& v1, Vec3<T> const& v2)
 
 template <typename T>
 inline
-Vec3<T> UnitVector(Vec3<T> vec)
+Vec3<T> MakeUnitVector(Vec3<T> vec)
 {
-	vec.MakeUnitVector();
-	return vec;
+	Vec3F result = vec;
+	result.MakeUnitVector();
+	return result;
 }
 
 template <typename T>
@@ -204,4 +205,4 @@ Vec3<T> reflect(Vec3<T> const& v, Vec3<T> const& n)
 	return v - 2 * dot(v, n)*n;
 }
 
-using Vec3F = Vec3<float>;
+using Vec3F = Vec3<double>;

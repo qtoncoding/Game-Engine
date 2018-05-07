@@ -6,22 +6,22 @@
 class Sphere : public IRayHitable
 {
 public:
-	Sphere(Vec3F c, float r, std::unique_ptr<IMaterial>&& m) : center(c), radius(r), mat(std::move(m)) {}
+	Sphere(Vec3F c, double r, std::unique_ptr<IMaterial>&& m) : center(c), radius(r), mat(std::move(m)) {}
 
-	bool hit(Ray const& r, float tMin, float tMax, HitRecord& rec) const override
+	bool hit(Ray const& r, double tMin, double tMax, HitRecord& rec) const override
 	{
 		rec.mat = mat.get();
 		auto oc = r.Origin() - center;
 		auto a = dot(r.Direction(), r.Direction());
-		auto b = 2.0f * dot(oc, r.Direction());
+		auto b = dot(oc, r.Direction());
 		auto c = dot(oc, oc) - radius * radius;
-		auto discriminant = b * b - 4 * a*c;
+		auto discriminant = b * b - a * c;
 		if (discriminant < 0)
 		{
 			return false;
 		}
 		else {
-			auto temp = (-b - std::sqrt(discriminant)) / (2.0f * a);
+			auto temp = (-b - std::sqrt(discriminant)) / a;
 			if (temp < tMax && temp > tMin)
 			{
 				rec.t = temp;
@@ -29,7 +29,7 @@ public:
 				rec.normal = (rec.p - center) / radius;
 				return true;
 			}
-			temp = (-b + std::sqrt(discriminant)) / (2.0f * a);
+			temp = (-b + std::sqrt(discriminant)) / a;
 			if (temp < tMax && temp > tMin)
 			{
 				rec.t = temp;
@@ -42,6 +42,6 @@ public:
 	}
 private:
 	Vec3F center;
-	float radius;
+	double radius;
 	std::unique_ptr<IMaterial> mat;
 };

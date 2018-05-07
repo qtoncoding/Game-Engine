@@ -38,7 +38,9 @@ class Buffer
 	constexpr static int frameOffset = 80;
 
 	std::default_random_engine ranDevice;
-	std::uniform_real_distribution<float> dist;
+	std::uniform_real_distribution<double> dist;
+
+	bool changed = false;
 public:
 	Buffer() {}
 	/// <summary>Create screen buffer</summary>
@@ -76,16 +78,13 @@ public:
 	/// <summary>Return height of buffer</summary>
 	int Height() const;
 
-	// TODO(Nhung): Implement draw line
-	/*void DrawLine(int x1, int y1, int x2, int y2, Color color)
-	{
-
-	}*/
-
 	void DrawFrameTime(std::vector<long long>& frameTime);
 	void DrawTargetFrameTime(int targetFrameTime);
 	void FillFrame();
-	void DrawGradient();
+	void DrawRayTrace();
+
+	bool Changed() const;
+	void ResetChangeStatus();
 };
 
 };

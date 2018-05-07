@@ -6,7 +6,7 @@ class IMaterial;
 
 struct HitRecord
 {
-	float t;
+	double t;
 	Vec3F p;
 	Vec3F normal;
 	IMaterial* mat;
@@ -15,6 +15,6 @@ struct HitRecord
 class IRayHitable 
 {
 public:
-	virtual bool hit(Ray const& r, float tMin, float tMax, HitRecord& rec) const = 0;
+	virtual bool hit(Ray const& r, double tMin, double tMax, HitRecord& rec) const = 0;
 };
 

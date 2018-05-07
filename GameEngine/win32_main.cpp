@@ -15,6 +15,7 @@ using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock>;
 constexpr static auto FPS = 30;
 constexpr static auto MillisecondsPerFrame = std::chrono::milliseconds(static_cast<int>(1000.0 / FPS));
 static bool Running = true;
+static bool NeedDrawing = true;
 
 void ProcessInput(MSG const& msg, GameState& game)
 {
@@ -45,6 +46,11 @@ void ProcessInput(MSG const& msg, GameState& game)
 	case VK_ESCAPE:
 	{
 		Running = false;
+	} break;
+
+	case VK_SPACE: 
+	{
+		NeedDrawing = true;
 	} break;
 
 	default:
@@ -99,9 +105,13 @@ WinMain(HINSTANCE Instance,
 	{
 		ProcessWindowMessage(windowHandle, game);
 
-		GE::Frame frame(buffer, deviceContext, buffer.Width(), buffer.Height(), frameTime);
+		GE::Frame frame(&buffer, &deviceContext, buffer.Width(), buffer.Height(), &frameTime);
 
-		buffer.DrawGradient();
+		if (NeedDrawing)
+		{
+			buffer.DrawRayTrace();
+			NeedDrawing = false;
+		}
 
 		/*buffer.DrawTargetFrameTime(33);
 		buffer.DrawFrameTime(frameTime);*/
