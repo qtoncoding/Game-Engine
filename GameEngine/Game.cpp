@@ -22,19 +22,19 @@ void GameState::drawMap(GE::Buffer& buffer)
 				auto cell = getCell(gridX, gridPositionY);
 				if (cell == '0')
 				{
-					buffer.DrawRange(gridX * GridSize, pixelY, GridSize, Color{ 128, 128, 128 });
+					buffer.DrawRange(gridX * GridSize, pixelY, GridSize, Color{ 250, 250, 250 });
 				}
 				else if (cell == '1')
 				{
-					buffer.DrawRange(gridX * GridSize, pixelY, GridSize, Color{ 0, 128, 128 });
+					buffer.DrawRange(gridX * GridSize, pixelY, GridSize, Color{ 0, 250, 250 });
 				}
 				else if (cell == '2')
 				{
-					buffer.DrawRange(gridX * GridSize, pixelY, GridSize, Color{ 128, 128, 0 });
+					buffer.DrawRange(gridX * GridSize, pixelY, GridSize, Color{ 250, 250, 0 });
 				}
 				else if (cell == '3')
 				{
-					buffer.DrawRange(gridX * GridSize, pixelY, GridSize, Color{ 128, 0, 128 });
+					buffer.DrawRange(gridX * GridSize, pixelY, GridSize, Color{ 250, 0, 250 });
 				}
 			}
 		}
@@ -71,22 +71,25 @@ void GameState::drawFOV(GE::Buffer& buffer)
 				auto height = buffer.Height() / (step * cos(angle - playerA));
 				auto yOffset = static_cast<int>((buffer.Height() - height) / 2.);
 				Rect column{ col + (buffer.Width() / 2), yOffset, 1, static_cast<int>(std::round(height))};
-				auto wallColor = Color{ 128, 128, 128};
+
+				auto color = static_cast<unsigned char>(std::round(255 / (step * cos(angle - playerA))));
+
+				auto wallColor = Color{ color, color, color };
 				switch (hitType)
 				{
 					case '1':
 					{
-						wallColor = Color{ 0, 128, 128 };
+						wallColor = Color{ 0, color, color };
 					} break;
 
 					case '2':
 					{
-						wallColor = Color{ 128, 128, 0 };
+						wallColor = Color{ color, color, 0 };
 					} break;
 
 					case '3':
 					{
-						wallColor = Color{ 128, 0, 128 };
+						wallColor = Color{ color, 0, color };
 					} break;
 
 					default:
@@ -98,7 +101,7 @@ void GameState::drawFOV(GE::Buffer& buffer)
 
 			auto x = static_cast<int>(cx * GridSize);
 			auto y = static_cast<int>(cy * GridSize);
-			buffer.DrawPixel(x, y, Color{ 255, 255, 255 });
+			buffer.DrawPixel(x, y, Color{ 255, 0, 0});
 		}
 	}
 }
