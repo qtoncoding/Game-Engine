@@ -3,6 +3,8 @@
 #include <Windows.h>
 #endif
 
+#include <array>
+
 #include "Window.hpp"
 #include "Frame.hpp"
 #include "Buffer.hpp"
@@ -16,7 +18,16 @@ constexpr static auto FPS = 30;
 constexpr static auto MillisecondsPerFrame = std::chrono::milliseconds(static_cast<int>(1000.0 / FPS));
 static bool Running = true;
 
-void ProcessInput(MSG const& msg, GameState& game)
+enum class KeyInput
+{
+	Up,
+	Down,
+	Left,
+	Right,
+	None
+};
+
+void ProcessInput(MSG const& msg, [[maybe_unused]]GameState& game)
 {
 	OutputDebugString("KeyDown!\n");
 	KeyInput currentInput = KeyInput::None;
@@ -49,11 +60,6 @@ void ProcessInput(MSG const& msg, GameState& game)
 
 	default:
 		break;
-	}
-
-	if (currentInput != KeyInput::None)
-	{
-		game.AddInput(currentInput);
 	}
 }
 
@@ -92,14 +98,36 @@ WinMain(HINSTANCE Instance,
 	auto width = buffer.Width();
 
 	std::vector<long long> frameTime(width);
-	GameState game;
+
+	constexpr size_t mapWidth = 16; // map width
+	constexpr size_t mapHeight = 16; // map height
+	auto mapData = 
+		"0000222222220000"\
+		"1              0"\
+		"1      11111   0"\
+		"1     0        0"\
+		"0     0  1110000"\
+		"0     3        0"\
+		"0   10000      0"\
+		"0   0   11100  0"\
+		"0   0   0      0"\
+		"0   0   1  00000"\
+		"0       1      0"\
+		"2       1      0"\
+		"0       0      0"\
+		"0 0000000      0"\
+		"0              0"\
+		"0002222222200000"; // our game map
+
+	GameState game(mapWidth, mapHeight, mapData);
+	game.PlayerX(3.456);
+	game.PlayerY(2.345);
+	game.PlayerA(1.523);
 
 	auto lastRenderTime = std::chrono::high_resolution_clock::now();
 
 	while (Running)
 	{
-		game.ClearInput();
-
 		ProcessWindowMessage(windowHandle, game);
 		
 		// Do game update

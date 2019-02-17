@@ -1,129 +1,107 @@
 #include "Game.h"
-#include "Color.h"
+#include "Buffer.hpp"
+#include <cmath>
 
-GameState::GameState()
+constexpr int GridSize = 35;
+
+char GameState::getCell(int x, int y) const
 {
-	makeBoard();
+	return MapData[y * Width + x];
 }
 
-void GameState::Draw(GE::Buffer & buffer)
+void GameState::drawMap(GE::Buffer& buffer)
 {
-	for (auto& g : boardGrid)
+	for (auto pixelY = 0; pixelY < GridSize * Height; ++pixelY)
 	{
-		DrawRect<DrawType::Fill>(buffer, g, Color{ 0xffffffff });
-	}
-
-	playerHead.draw(buffer);
-	for (auto& b : playerBody)
-	{
-		b.draw(buffer);
-	}
-}
-
-void GameState::movePlayer()
-{
-	if (currentDirection != Direction::None)
-	{
-		playerBody.push_back(Node(playerHead));
-		std::rotate(std::begin(playerBody), std::prev(std::end(playerBody)), std::end(playerBody));
-	}
-
-	switch (currentDirection)
-	{
-	case Direction::Up:
-	{
-		playerHead.y += 1;
-	} break;
-
-	case Direction::Down:
-	{
-		playerHead.y -= 1;
-	} break;
-
-	case Direction::Left:
-	{
-		playerHead.x -= 1;
-	} break;
-
-	case Direction::Right:
-	{
-		playerHead.x += 1;
-	} break;
-
-	default:
-		break;
-	}
-	currentDirection = Direction::None;
-}
-
-void GameState::processInput()
-
-{
-	if (!inputs.empty())
-	{
-		for (auto& input : inputs)
+		for (auto gridX = 0; gridX < Width; ++gridX)
 		{
-			switch (input)
-			{
-			case KeyInput::Up:
-			{
-				currentDirection = Direction::Up;
-			} break;
+			auto gridPositionY = pixelY / GridSize;
 
-			case KeyInput::Down:
+			if (gridPositionY < Height)
 			{
-				currentDirection = Direction::Down;
-			} break;
-
-			case KeyInput::Left:
-			{
-				currentDirection = Direction::Left;
-			} break;
-
-			case KeyInput::Right:
-			{
-				currentDirection = Direction::Right;
-			} break;
-
-			default:
-				break;
+				auto cell = getCell(gridX, gridPositionY);
+				if (cell == '0')
+				{
+					buffer.DrawRange(gridX * GridSize, pixelY, GridSize, Color{ 128, 128, 128 });
+				}
+				else if (cell == '1')
+				{
+					buffer.DrawRange(gridX * GridSize, pixelY, GridSize, Color{ 0, 128, 128 });
+				}
+				else if (cell == '2')
+				{
+					buffer.DrawRange(gridX * GridSize, pixelY, GridSize, Color{ 128, 128, 0 });
+				}
 			}
 		}
 	}
 }
 
+void GameState::drawPlayer(GE::Buffer& buffer)
+{
+	Rect playerRect{ static_cast<int>(playerX * GridSize), static_cast<int>(playerY * GridSize), 5, 5 };
+	DrawRect<DrawType::Fill>(buffer, playerRect, Color{ 0, 255, 0 });
+}
+
+char hit(int width, int x, int y, char const* map)
+{
+	return map[x + y * width];
+}
+
+constexpr double PI = 3.1415926535897932384626433;
+
+void GameState::drawFOV(GE::Buffer& buffer)
+{
+	constexpr double fov = PI / 3.0;
+	for (auto col = 0; col < (GridSize * Width); ++col)
+	{
+		auto angle = playerA - (fov / 2.) + ((fov * col) / (GridSize * Width));
+
+		for (auto step = 0.0; step < 20; step += .01)
+		{
+			auto cx = playerX + step * std::cos(angle);
+			auto cy = playerY + step * std::sin(angle);
+			auto hitType = hit(Width, static_cast<int>(cx), static_cast<int>(cy), MapData);
+			if (hitType != ' ')
+			{
+				auto height = buffer.Height() / (step * cos(angle - playerA));
+				auto yOffset = static_cast<int>((buffer.Height() - height) / 2.);
+				Rect column{ col + (buffer.Width() / 2), yOffset, 1, static_cast<int>(std::round(height))};
+				auto wallColor = Color{ 128, 128, 128};
+				switch (hitType)
+				{
+					case '1':
+					{
+						wallColor = Color{ 0, 128, 128 };
+					} break;
+
+					case '2':
+					{
+						wallColor = Color{ 128, 128, 0 };
+					} break;
+
+					default:
+						break;
+				}
+				DrawRect<DrawType::Fill>(buffer, column, wallColor);
+				break;
+			}
+
+			auto x = static_cast<int>(cx * GridSize);
+			auto y = static_cast<int>(cy * GridSize);
+			buffer.DrawPixel(x, y, Color{ 255, 255, 255 });
+		}
+	}
+}
+
+void GameState::Draw(GE::Buffer & buffer)
+{
+	drawMap(buffer);
+	drawPlayer(buffer);
+	drawFOV(buffer);
+}
+
 void GameState::Update()
 {
-	processInput();
-	movePlayer();
-}
-
-void GameState::ClearInput()
-{
-	inputs.clear();
-}
-
-void GameState::AddInput(KeyInput input)
-{
-	inputs.push_back(input);
-}
-
-void GameState::makeBoard()
-{
-	for (auto i = 0; i < rows; ++i)
-	{
-		boardGrid.emplace_back(Rect{ 0, i*cellSize, 1000, 2 });
-	}
-
-	for (auto i = 0; i < cols; ++i)
-	{
-		boardGrid.emplace_back(Rect{ i*cellSize, 0, 2, 1000 });
-	}
-}
-
-void GameState::Node::draw(GE::Buffer& buffer)
-{
-	sprite.x = x * cellSize;
-	sprite.y = y * cellSize;
-	DrawRect<DrawType::Fill>(buffer, sprite, Color{ 0x90ffffff });
+	playerA -= 0.0025;
 }

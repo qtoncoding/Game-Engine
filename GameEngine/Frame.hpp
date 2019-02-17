@@ -58,7 +58,7 @@ private:
 	{
 		auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endFrame - beginFrame);
 
-		if (frameTime.size() == frameTime.capacity())
+		if (frameTime.size() == m_width)
 		{
 			std::rotate(frameTime.begin(), std::next(frameTime.begin()), frameTime.end());
 			frameTime[frameTime.size() - 1] = elapsedTime.count();

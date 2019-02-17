@@ -6,11 +6,9 @@
 
 #include <algorithm>
 #include <vector>
-#include <variant>
 
 #include "Shapes.h"
 #include "Color.h"
-
 
 enum class DrawType : uint8_t
 {
@@ -32,7 +30,7 @@ class Buffer
 	std::vector<Color> data;
 	int m_width;
 	int m_height;
-	constexpr static int frameOffset = 80;
+	constexpr static int frameOffset = 0;
 
 public:
 	Buffer() {}
@@ -71,16 +69,12 @@ public:
 	/// <summary>Return height of buffer</summary>
 	int Height() const;
 
-	// TODO(Nhung): Implement draw line
-	/*void DrawLine(int x1, int y1, int x2, int y2, Color color)
-	{
-
-	}*/
-
 	void DrawFrameTime(std::vector<long long>& frameTime);
 	void DrawTargetFrameTime(int targetFrameTime);
 	void FillFrame();
 	void DrawLine(int x1, int y1, int x2, int y2, Color color);
+
+	void DrawRange(int x, int y, int length, Color color);
 };
 
 };

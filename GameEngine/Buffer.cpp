@@ -1,5 +1,9 @@
 #include "Buffer.hpp"
 
+#include <stdexcept>
+#include <cmath>
+#include <cstdlib>
+
 void Impl::drawRectInternal(GE::Buffer & buffer, const Rect & rect, Color fillColor)
 {
 	int startX = rect.x >= 0 ? rect.x : 0;
@@ -22,7 +26,7 @@ GE::Buffer::Buffer(int width, int height) :
 {
 	info.bmiHeader.biSize = sizeof(info.bmiHeader);
 	info.bmiHeader.biWidth = m_width;
-	info.bmiHeader.biHeight = m_height;
+	info.bmiHeader.biHeight = -m_height;
 	info.bmiHeader.biPlanes = 1;
 	info.bmiHeader.biBitCount = 32;
 	info.bmiHeader.biCompression = BI_RGB;
@@ -50,7 +54,7 @@ void GE::Buffer::DrawPixel(int x, int y, Color newColor)
 {
 	if (x >= 0 && x < m_width && y >= 0 && y < m_height)
 	{
-		auto ratio = static_cast<double>(newColor.color.alpha) / 0xff;
+		/*auto ratio = static_cast<double>(newColor.color.alpha) / 0xff;
 		auto oldColor = this->at(x, y);
 
 		auto oldR = oldColor.color.red;
@@ -67,7 +71,18 @@ void GE::Buffer::DrawPixel(int x, int y, Color newColor)
 		colorToDraw.color.blue = static_cast<unsigned char>(newB * ratio + oldB * (1 - ratio));
 		colorToDraw.color.alpha = 0xff;
 
-		this->at(x, y) = colorToDraw;
+		this->at(x, y) = colorToDraw;*/
+		this->at(x, y) = newColor;
+	}
+}
+
+void GE::Buffer::DrawRange(int x, int y, int length, Color color)
+{
+	if (x >= 0 && x < m_width && (x + length < m_width) && y >= 0 && y < m_height)
+	{
+		auto start = std::next(std::begin(data), (x + (y * m_width)));
+		auto end = std::next(start, length);
+		std::fill(start, end, color);
 	}
 }
 
@@ -85,7 +100,7 @@ void GE::Buffer::DrawFrameTime(std::vector<long long>& frameTime)
 {
 	for (auto i = 0u; i < frameTime.size(); ++i)
 	{
-		DrawPixel(i, static_cast<int>(frameTime[i]) + frameOffset, Color{ 0xffffff00 });
+		DrawPixel(i, Height() - (static_cast<int>(frameTime[i]) + frameOffset), Color{ 0xffffff00 });
 	}
 }
 
@@ -93,7 +108,7 @@ void GE::Buffer::DrawTargetFrameTime(int targetFrameTime)
 {
 	for (auto i = 0; i < m_width; ++i)
 	{
-		DrawPixel(i, targetFrameTime + frameOffset, Color{ 0xff00ff00 });
+		DrawPixel(i, Height() - (targetFrameTime + frameOffset), Color{ 0xff00ff00 });
 	}
 }
 

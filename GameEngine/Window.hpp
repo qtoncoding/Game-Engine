@@ -5,11 +5,12 @@
 #endif
 
 #include "Buffer.hpp"
+#include <stdexcept>
 
 namespace GE
 {
-constexpr int DefaultWindowWidth = 960;
-constexpr int DefaultWindowHeight = 640;
+constexpr int DefaultWindowWidth = 1150;
+constexpr int DefaultWindowHeight = 575;
 
 LRESULT CALLBACK
 WndProc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
