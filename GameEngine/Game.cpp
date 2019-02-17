@@ -72,7 +72,10 @@ void GameState::drawFOV(GE::Buffer& buffer)
 				auto yOffset = static_cast<int>((buffer.Height() - height) / 2.);
 				Rect column{ col + (buffer.Width() / 2), yOffset, 1, static_cast<int>(std::round(height))};
 
-				auto color = static_cast<unsigned char>(std::round(255 / (step * cos(angle - playerA))));
+				auto colorVal = std::round(255 / (step * cos(angle - playerA)));
+				if (colorVal > 255)
+					colorVal = 255;
+				auto color = static_cast<unsigned char>(colorVal);
 
 				auto wallColor = Color{ color, color, color };
 				switch (hitType)

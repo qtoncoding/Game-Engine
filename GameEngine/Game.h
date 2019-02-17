@@ -48,6 +48,16 @@ public:
 		return playerA;
 	}
 
+	double PlayerX() const
+	{
+		return playerX;
+	}
+
+	double PlayerY() const
+	{
+		return playerY;
+	}
+
 	void Draw(GE::Buffer& buffer);
 	void Update();
 };

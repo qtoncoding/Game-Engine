@@ -120,12 +120,17 @@ WinMain(HINSTANCE Instance,
 		"0002222222200000"; // our game map
 
 	GameState game(mapWidth, mapHeight, mapData);
-	game.PlayerX(3.456);
-	game.PlayerY(2.345);
+	auto totalDistance = 12.0;
+	constexpr double startY = 3.456;
+	auto distanceLeftY = totalDistance - startY;
+	game.PlayerX(1.845);
+	game.PlayerY(startY);
 	game.PlayerA(1.523);
 
 	auto lastRenderTime = std::chrono::high_resolution_clock::now();
 	auto lastUpdateTime = lastRenderTime;
+	int direction = -1;
+
 	while (Running)
 	{
 		ProcessWindowMessage(windowHandle, game);
@@ -135,6 +140,13 @@ WinMain(HINSTANCE Instance,
 		if (elapsedTimeMs > 15)
 		{
 			game.PlayerA(game.PlayerA() - (0.0025 * (elapsedTimeMs / 15.)));
+			if (distanceLeftY <= 0 || distanceLeftY > totalDistance - startY)
+			{
+				direction *= -1;
+			}
+			distanceLeftY += direction * (0.01 * (elapsedTimeMs / 15.));
+			game.PlayerY(totalDistance - distanceLeftY);
+
 			lastUpdateTime = currentTime;
 		}
 		// Do game update
