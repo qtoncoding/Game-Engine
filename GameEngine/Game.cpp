@@ -32,6 +32,10 @@ void GameState::drawMap(GE::Buffer& buffer)
 				{
 					buffer.DrawRange(gridX * GridSize, pixelY, GridSize, Color{ 128, 128, 0 });
 				}
+				else if (cell == '3')
+				{
+					buffer.DrawRange(gridX * GridSize, pixelY, GridSize, Color{ 128, 0, 128 });
+				}
 			}
 		}
 	}
@@ -80,6 +84,11 @@ void GameState::drawFOV(GE::Buffer& buffer)
 						wallColor = Color{ 128, 128, 0 };
 					} break;
 
+					case '3':
+					{
+						wallColor = Color{ 128, 0, 128 };
+					} break;
+
 					default:
 						break;
 				}
@@ -103,5 +112,4 @@ void GameState::Draw(GE::Buffer & buffer)
 
 void GameState::Update()
 {
-	playerA -= 0.0025;
 }

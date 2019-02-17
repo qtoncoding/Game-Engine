@@ -70,6 +70,8 @@ private:
 
 		std::stringstream str;
 		str << "Drawing took: " << elapsedTime.count() << "ms\n";
+		auto fullSecond = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds(1)).count();
+		str << "FPS: " << fullSecond / elapsedTime.count() << "fps\n";
 		OutputDebugString(str.str().c_str());
 	}
 

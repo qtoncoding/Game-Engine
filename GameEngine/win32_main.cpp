@@ -125,11 +125,18 @@ WinMain(HINSTANCE Instance,
 	game.PlayerA(1.523);
 
 	auto lastRenderTime = std::chrono::high_resolution_clock::now();
-
+	auto lastUpdateTime = lastRenderTime;
 	while (Running)
 	{
 		ProcessWindowMessage(windowHandle, game);
 		
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		auto elapsedTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastUpdateTime).count();
+		if (elapsedTimeMs > 15)
+		{
+			game.PlayerA(game.PlayerA() - (0.0025 * (elapsedTimeMs / 15.)));
+			lastUpdateTime = currentTime;
+		}
 		// Do game update
 		game.Update();
 	
