@@ -18,58 +18,13 @@ using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
 static bool Running = true;
 
-void ProcessInput(MSG const& msg, GameState& game)
-{
-	OutputDebugString("KeyDown!\n");
-	KeyInput currentInput = KeyInput::None;
-	switch (msg.wParam)
-	{
-	case VK_UP:
-	{
-		currentInput = KeyInput::Up;
-	} break;
-
-	case VK_DOWN:
-	{
-		currentInput = KeyInput::Down;
-	} break;
-
-	case VK_LEFT:
-	{
-		currentInput = KeyInput::Left;
-	} break;
-
-	case VK_RIGHT:
-	{
-		currentInput = KeyInput::Right;
-	} break;
-
-	case VK_ESCAPE:
-	{
-		Running = false;
-	} break;
-
-	default:
-		break;
-	}
-
-	if (currentInput != KeyInput::None)
-	{
-		game.AddInput(currentInput);
-	}
-}
-
-void ProcessWindowMessage(HWND& windowHandle, GameState& game)
+void ProcessWindowMessage(HWND& windowHandle)
 {
 	MSG msg;
 	while (PeekMessage(&msg, windowHandle, 0, 0, PM_REMOVE))
 	{
 		switch (msg.message)
 		{
-		case WM_KEYDOWN:
-		{
-			ProcessInput(msg, game);
-		} break;
 
 		default:
 		{
@@ -97,11 +52,13 @@ struct HitRecord {
 	Point3D p;
 	Vec3F normal;
 	double t;
+	Vec3F attenuation;
 };
 
 struct Sphere {
 	Point3D center;
 	double radius;
+	Vec3F albedo;
 };
 
 constexpr std::pair<bool, HitRecord> hitSphere(Sphere const& sphere, double minT, double maxT, Ray const& r) {
@@ -120,7 +77,7 @@ constexpr std::pair<bool, HitRecord> hitSphere(Sphere const& sphere, double minT
 			if (dot(r.direction, normal) >= 0) {
 				normal = -normal;
 			}
-			HitRecord newRec{ p, normal, temp };
+			HitRecord newRec{ p, normal, temp, sphere.albedo };
 			return std::make_pair(true, newRec);
 		}
 		temp = (-b + root) / a;
@@ -130,7 +87,7 @@ constexpr std::pair<bool, HitRecord> hitSphere(Sphere const& sphere, double minT
 			if (dot(r.direction, normal) >= 0) {
 				normal = -normal;
 			}
-			HitRecord newRec{ p, normal, temp };
+			HitRecord newRec{ p, normal, temp, sphere.albedo };
 			return std::make_pair(true, newRec);
 		}
 	}
@@ -164,10 +121,12 @@ constexpr std::pair<bool, Ray> scatter(Ray const& r, HitRecord const& rec) {
 }
 
 constexpr Point3D sphere1Origin = { -0.6, 0, -1 };
-constexpr Point3D sphere2Origin = { 0.8, -0.3, -1 };
+constexpr Point3D sphere2Origin = { 0.8, -0.35, -1 };
 constexpr Point3D sphere3Origin = { 0, -100.6, -1 };
-constexpr std::array<Sphere, 3> world{ Sphere { sphere1Origin, 0.5 }, Sphere { sphere2Origin, 0.2 }, Sphere { sphere3Origin, 100 } };
-constexpr Vec3F attenuation = { .9, .9, .8 };
+constexpr Vec3F albedo1 = { .9, .9, .8 };
+constexpr Vec3F albedo2 = { .9, .6, .6 };
+constexpr Vec3F albedo3 = { .6, .6, .8 };
+constexpr std::array<Sphere, 3> world{ Sphere { sphere1Origin, 0.5, albedo1 }, Sphere { sphere2Origin, 0.2, albedo2 }, Sphere { sphere3Origin, 100, albedo3 } };
 
 constexpr Vec3F rayColor(Ray const& r, int depth) {
 	if (depth <= 0) {
@@ -179,7 +138,7 @@ constexpr Vec3F rayColor(Ray const& r, int depth) {
 		auto [bounce, newRay] = scatter(r, newRec);
 		if (bounce) {
 			auto newColor = rayColor(newRay, depth - 1);
-			return attenuation * newColor;
+			return newRec.attenuation * newColor;
 		}
 		return Vec3F( 0, 0, 0 );
 	}
@@ -233,14 +192,12 @@ WinMain(HINSTANCE Instance,
 	auto deviceContext = window.DeviceContext();
 	auto windowHandle = window.Handle();
 
-	GameState game;
-
 	constexpr auto pixelBuffer = makeBuffer<PixelCount>(getPixel);
 	buffer.SetData(pixelBuffer.data());
 
 	while (Running)
 	{
-		ProcessWindowMessage(windowHandle, game);
+		ProcessWindowMessage(windowHandle);
 
 		GE::Frame frame(&buffer, &deviceContext, buffer.Width(), buffer.Height());
 	}

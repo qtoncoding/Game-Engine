@@ -8,7 +8,7 @@
 
 namespace GE
 {
-constexpr int DefaultWindowWidth = 600;
+constexpr int DefaultWindowWidth = 300;
 constexpr int DefaultWindowHeight = static_cast<int>(DefaultWindowWidth / (16.0 / 9.0));
 
 LRESULT CALLBACK
