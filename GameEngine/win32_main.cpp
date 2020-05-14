@@ -123,9 +123,9 @@ constexpr std::pair<bool, Ray> scatter(Ray const& r, HitRecord const& rec) {
 constexpr Point3D sphere1Origin = { -0.6, 0, -1 };
 constexpr Point3D sphere2Origin = { 0.8, -0.35, -1 };
 constexpr Point3D sphere3Origin = { 0, -100.6, -1 };
-constexpr Vec3F albedo1 = { .9, .9, .8 };
-constexpr Vec3F albedo2 = { .9, .6, .6 };
-constexpr Vec3F albedo3 = { .6, .6, .8 };
+constexpr Vec3F albedo1 = { .7, .7, .9 };
+constexpr Vec3F albedo2 = { .9, .7, .7 };
+constexpr Vec3F albedo3 = { .9, .9, .8 };
 constexpr std::array<Sphere, 3> world{ Sphere { sphere1Origin, 0.5, albedo1 }, Sphere { sphere2Origin, 0.2, albedo2 }, Sphere { sphere3Origin, 100, albedo3 } };
 
 constexpr Vec3F rayColor(Ray const& r, int depth) {
