@@ -1,208 +1,208 @@
 #pragma once
 
 #include <array>
-#include <cmath>
+
+#include <limits>	
+
+namespace Detail
+{
+	double constexpr sqrtNewtonRaphson(double x, double curr, double prev)
+	{
+		return curr == prev
+			? curr
+			: sqrtNewtonRaphson(x, 0.5 * (curr + x / curr), curr);
+	}
+}
+
+/*
+* Constexpr version of the square root
+* Return value:
+*	- For a finite and non-negative value of "x", returns an approximation for the square root of "x"
+*   - Otherwise, returns NaN
+*/
+double constexpr const_sqrt(double x)
+{
+	return x >= 0 && x < std::numeric_limits<double>::infinity()
+		? Detail::sqrtNewtonRaphson(x, x, 0)
+		: std::numeric_limits<double>::quiet_NaN();
+}
 
 template <typename T>
-class Vec3
+struct Vec3
 {
-public:
-	Vec3() = default;
-	Vec3(T e1, T e2, T e3)
+	constexpr Vec3() = default;
+	constexpr Vec3(T e1, T e2, T e3) : x(e1), y(e2), z(e3)
 	{
-		e = { e1, e2, e3 };
 	}
-	Vec3(Vec3<T> const& v) = default;
-	Vec3(Vec3<T>&& v) = default;
-	Vec3<T>& operator=(Vec3<T> const& v) = default;
-	Vec3<T>& operator=(Vec3<T>&& v) = default;
-
-	inline T x() const { return e[0]; }
-	inline T y() const { return e[1]; }
-	inline T z() const { return e[2]; }
 
 	// Positive/Negative
-	inline Vec3<T> const& operator+() const { return *this; }
-	inline Vec3<T> operator-() const { return Vec3<T>(-e[0], -e[1], -e[2]); }
-
-	// Indexing
-	inline T operator[](int i) const { return e[i]; }
-	inline T& operator[](int i) { return e[i]; }
+	inline constexpr Vec3<T> const& operator+() const { return *this; }
+	inline constexpr Vec3<T> operator-() const { return Vec3<T>(-x, -y, -z); }
 
 	// Arithmetic
-	inline Vec3<T>& operator+=(Vec3<T> const& v) 
+	inline constexpr Vec3<T>& operator+=(Vec3<T> const& v)
 	{
-		e[0] += v.e[0];
-		e[1] += v.e[1];
-		e[2] += v.e[2];
+		x += v.x;
+		y += v.y;
+		z += v.z;
 
 		return *this;
 	}
 
-	inline Vec3<T>& operator-=(Vec3<T> const& v)
+	inline constexpr Vec3<T>& operator-=(Vec3<T> const& v)
 	{
-		e[0] -= v.e[0];
-		e[1] -= v.e[1];
-		e[2] -= v.e[2];
+		x -= v.x;
+		y -= v.y;
+		z -= v.z;
 
 		return *this;
 	}
 
-	inline Vec3<T>& operator*=(Vec3<T> const& v)
+	inline constexpr Vec3<T>& operator*=(Vec3<T> const& v)
 	{
-		e[0] *= v.e[0];
-		e[1] *= v.e[1];
-		e[2] *= v.e[2];
+		x *= v.x;
+		y *= v.y;
+		z *= v.z;
 
 		return *this;
 	}
 
-	inline Vec3<T>& operator/=(Vec3<T> const& v)
+	inline constexpr Vec3<T>& operator/=(Vec3<T> const& v)
 	{
-		e[0] /= v.e[0];
-		e[1] /= v.e[1];
-		e[2] /= v.e[2];
+		x /= v.x;
+		y /= v.y;
+		z /= v.z;
 
 		return *this;
 	}
 
-	inline Vec3<T>& operator*=(T const t)
+	inline constexpr Vec3<T>& operator*=(T const t)
 	{
-		e[0] *= t;
-		e[1] *= t;
-		e[2] *= t;
+		x *= t;
+		y *= t;
+		z *= t;
 
 		return *this;
 	}
 	
-	inline Vec3<T>& operator/=(T const t)
+	inline constexpr Vec3<T>& operator/=(T const t)
 	{
-		e[0] /= t;
-		e[1] /= t;
-		e[2] /= t;
+		x /= t;
+		y /= t;
+		z /= t;
 
 		return *this;
 	}
 
 	// Vector ops
-	inline T SquaredLength() const { return e[0] * e[0] + e[1] * e[1] + e[2] * e[2]; }
-	inline T Length() const { return std::sqrt(SquaredLength()); }
+	inline constexpr T SquaredLength() const { return x * x + y * y + z * z; }
+	inline constexpr T Length() { return const_sqrt(SquaredLength()); }
 	inline void MakeUnitVector() 
 	{
 		T k = 1.0f / Length();
-		e[0] *= k;
-		e[1] *= k;
-		e[2] *= k;
+		x *= k;
+		y *= k;
+		z *= k;
 	}
 
-	// Global operators
-	template <typename T> friend Vec3<T> operator+(Vec3<T> const& v1, Vec3<T> const& v2);
-	template <typename T> friend Vec3<T> operator-(Vec3<T> const& v1, Vec3<T> const& v2);
-	template <typename T> friend Vec3<T> operator*(Vec3<T> const& v1, Vec3<T> const& v2);
-	template <typename T> friend Vec3<T> operator/(Vec3<T> const& v1, Vec3<T> const& v2);
-	template <typename T> friend Vec3<T> operator*(Vec3<T> const& v, T t);
-	template <typename T> friend Vec3<T> operator*(T t, Vec3<T> const& v);
-	template <typename T> friend Vec3<T> operator/(Vec3<T> const& v, T t);
-	template <typename T> friend T dot(Vec3<T> const& v1, Vec3<T> const& v2);
-	template <typename T> friend Vec3<T> cross(Vec3<T> const& v1, Vec3<T> const& v2);
-	template <typename T> friend Vec3<T> reflect(Vec3<T> const& v1, Vec3<T> const& v2);
-private:
-	std::array<T, 3> e;
+	T x;
+	T y;
+	T z;
 };
 
 template <typename T>
 inline
-Vec3<T> operator+(Vec3<T> const& v1, Vec3<T> const& v2) 
+constexpr Vec3<T> operator+(Vec3<T> const& v1, Vec3<T> const& v2)
 {
-	return Vec3<T>(v1.e[0] + v2.e[0],
-				   v1.e[1] + v2.e[1],
-				   v1.e[2] + v2.e[2]);
+	return Vec3<T>(v1.x + v2.x,
+				   v1.y + v2.y,
+				   v1.z + v2.z);
 }
 
 template <typename T>
 inline
-Vec3<T> operator-(Vec3<T> const& v1, Vec3<T> const& v2)
+constexpr Vec3<T> operator-(Vec3<T> const& v1, Vec3<T> const& v2)
 {
-	return Vec3<T>(v1.e[0] - v2.e[0],
-				   v1.e[1] - v2.e[1],
-				   v1.e[2] - v2.e[2]);
+	return Vec3<T>(v1.x - v2.x,
+				   v1.y - v2.y,
+				   v1.z - v2.z);
 }
 
 template <typename T>
 inline
-Vec3<T> operator*(Vec3<T> const& v1, Vec3<T> const& v2)
+constexpr Vec3<T> operator*(Vec3<T> const& v1, Vec3<T> const& v2)
 {
-	return Vec3<T>(v1.e[0] * v2.e[0],
-				   v1.e[1] * v2.e[1],
-				   v1.e[2] * v2.e[2]);
+	return Vec3<T>(v1.x * v2.x,
+				   v1.y * v2.y,
+				   v1.z * v2.z);
 }
 
 template <typename T>
 inline
-Vec3<T> operator/(Vec3<T> const& v1, Vec3<T> const& v2)
+constexpr Vec3<T> operator/(Vec3<T> const& v1, Vec3<T> const& v2)
 {
-	return Vec3<T>(v1.e[0] / v2.e[0],
-				   v1.e[1] / v2.e[1],
-				   v1.e[2] / v2.e[2]);
+	return Vec3<T>(v1.x / v2.x,
+				   v1.y / v2.y,
+				   v1.z / v2.z);
 }
 
 template <typename T>
 inline
-Vec3<T> operator*(Vec3<T> const& v, T t)
+constexpr Vec3<T> operator*(Vec3<T> const& v, T t)
 {
-	return Vec3<T>(v.e[0] * t,
-				   v.e[1] * t,
-				   v.e[2] * t);
+	return Vec3<T>(v.x * t,
+				   v.y * t,
+				   v.z * t);
 }
 
 template <typename T>
 inline
-Vec3<T> operator*(T t, Vec3<T> const& v)
+constexpr Vec3<T> operator*(T t, Vec3<T> const& v)
 {
 	return v * t;
 }
 
 template <typename T>
 inline
-Vec3<T> operator/(Vec3<T> const& v, T t)
+constexpr Vec3<T> operator/(Vec3<T> const& v, T t)
 {
-	return Vec3<T>(v.e[0] / t,
-				   v.e[1] / t,
-				   v.e[2] / t);
+	return Vec3<T>(v.x / t,
+				   v.y / t,
+				   v.z / t);
 }
 
 template <typename T>
 inline
-T dot(Vec3<T> const& v1, Vec3<T> const& v2)
+constexpr T dot(Vec3<T> const& v1, Vec3<T> const& v2)
 {
-	return v1.e[0] * v2.e[0] +
-		   v1.e[1] * v2.e[1] +
-		   v1.e[2] * v2.e[2];
+	return v1.x * v2.x +
+		   v1.y * v2.y +
+		   v1.z * v2.z;
 }
 
 template <typename T>
 inline
-Vec3<T> cross(Vec3<T> const& v1, Vec3<T> const& v2)
+constexpr Vec3<T> cross(Vec3<T> const& v1, Vec3<T> const& v2)
 {
-	return Vec3<T>( (v1.e[1]*v2.e[2] - v1.e[2]*v2.e[1]),
-				   -(v1.e[0]*v2.e[2] - v1.e[2]*v2.e[0]),
-				    (v1.e[0]*v2.e[1] - v1.e[1]*v2.e[0]) );
+	return Vec3<T>( (v1.y*v2.z - v1.z*v2.y),
+				   -(v1.x*v2.z - v1.z*v2.x),
+				    (v1.x*v2.y - v1.y*v2.x) );
+}
+
+using Vec3F = Vec3<double>;
+
+template <typename T>
+inline
+constexpr Vec3<T> MakeUnitVector(Vec3<T> vec)
+{
+	auto k = 1.0f / vec.Length();
+	return Vec3<T>(vec.x * k, vec.y * k, vec.z * k );
 }
 
 template <typename T>
 inline
-Vec3<T> MakeUnitVector(Vec3<T> vec)
-{
-	Vec3F result = vec;
-	result.MakeUnitVector();
-	return result;
-}
-
-template <typename T>
-inline
-Vec3<T> reflect(Vec3<T> const& v, Vec3<T> const& n)
+constexpr Vec3<T> reflect(Vec3<T> const& v, Vec3<T> const& n)
 {
 	return v - 2 * dot(v, n)*n;
 }
 
-using Vec3F = Vec3<double>;

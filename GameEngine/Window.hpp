@@ -8,8 +8,8 @@
 
 namespace GE
 {
-constexpr int DefaultWindowWidth = 1200;
-constexpr int DefaultWindowHeight = 800;
+constexpr int DefaultWindowWidth = 600;
+constexpr int DefaultWindowHeight = static_cast<int>(DefaultWindowWidth / (16.0 / 9.0));
 
 LRESULT CALLBACK
 WndProc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
@@ -87,12 +87,12 @@ public:
 	}
 
 private:
+	HINSTANCE m_instance;
 	int m_width;
 	int m_height;
 	HWND m_handle;
-	Buffer m_buffer;
 	HDC m_dc;
-	HINSTANCE m_instance;
+	Buffer m_buffer;
 
 	/// <summary>Create a new Window for displaying content</summary>
 	/// <param name='windowProc'>Window Proc function</param>
@@ -116,14 +116,22 @@ private:
 			throw std::runtime_error("Cannot register window class");
 		}
 
+		RECT windowRect{ 0, 0, m_width, m_height };
+		auto width = m_width;
+		auto height = m_height;
+		if (AdjustWindowRectEx(&windowRect, WS_BORDER | WS_CAPTION | WS_SYSMENU, FALSE, 0)) {
+			width = windowRect.right - windowRect.left;
+			height = windowRect.bottom - windowRect.top;
+		}
+
 		auto windowHandle = CreateWindowEx(0,
 										   className,
 										   windowTitle,
-										   WS_OVERLAPPEDWINDOW,
+										   WS_BORDER | WS_CAPTION | WS_SYSMENU,
 										   CW_USEDEFAULT,
 										   CW_USEDEFAULT,
-										   m_width,
-										   m_height,
+										   width,
+										   height,
 										   nullptr,
 										   nullptr,
 										   m_instance,

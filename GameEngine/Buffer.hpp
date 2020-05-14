@@ -8,11 +8,7 @@
 #include <vector>
 #include <variant>
 #include <random>
-#include "Shapes.h"
 #include "Color.h"
-#include "Vec3.h"
-#include "Ray.h"
-#include "HitableList.h"
 
 
 enum class DrawType : uint8_t
@@ -35,83 +31,32 @@ class Buffer
 	std::vector<Color> data;
 	int m_width;
 	int m_height;
-	constexpr static int frameOffset = 80;
 
-	std::default_random_engine ranDevice;
-	std::uniform_real_distribution<double> dist;
+	Color* frameData = nullptr;
 
 	bool changed = false;
 public:
 	Buffer() {}
-	/// <summary>Create screen buffer</summary>
-	/// <param name='width'>Width of buffer</param>
-	/// <param name='height'>Height of buffer</param>
-	/// <exception>Can throw exception if out of memory for screen buffer</exception>
+
 	Buffer(int width, int height);
 
-	/// <summary>Get pointer to BitMap Info struct of screen buffer</summary>
 	BITMAPINFO* BMapInfoPtr();
 
-	/// <summary>Get pointer to screen buffer as c-array of uint32_t</summary>
 	uint32_t* Data();
 
-
-	/// <summary> Get reference to pixel at certain column and row</summary>
-	/// <param name='col'>Column of pixel</param> 
-	/// <param name='row'>Row of pixel</param>
-	/// <exception cref='std::invalid_argument'>Invalid Argument exception thrown when given invalid coordinate</exception>
 	Color& at(int col, int row);
 	
-
-	/// <summary>Draw pixel at given column and row with color</summary>
-	/// <param name='x'>Column of pixel</param> 
-	/// <param name='y'>Row of pixel</param>
-	/// <param name='color'>Color of pixel</param>
-	/// <remark>No-op when given invalid pixel coordinate</remark>
 	void DrawPixel(int x, int y, Color newColor);
 	
-
-	/// <summary>Return width of buffer</summary>
 	int Width() const;
 	
-
-	/// <summary>Return height of buffer</summary>
 	int Height() const;
 
-	void DrawFrameTime(std::vector<long long>& frameTime);
-	void DrawTargetFrameTime(int targetFrameTime);
 	void FillFrame();
-	void DrawRayTrace();
-
+	void SetData(const Color* f);
 	bool Changed() const;
 	void ResetChangeStatus();
-};
 
 };
-	
-namespace Impl
-{
-	void drawRectInternal(GE::Buffer& buffer, const Rect& rect, Color fillColor);
-}
 
-template <DrawType i>
-void DrawRect(GE::Buffer& buffer, const Rect& rect, Color fillColor, [[maybe_unused]] Color outlineColor = Color{ 0x00 })
-{
-	Rect innerRect = rect;
-	Color innerColor = fillColor;
-	if constexpr (i & DrawType::Outline)
-	{
-		Impl::drawRectInternal(rect, outlineColor);
-		constexpr int strokeWidth = 4;
-		innerRect.x += strokeWidth;
-		innerRect.y += strokeWidth;
-		innerRect.width -= strokeWidth;
-		innerRect.height -= strokeWidth;
-		if constexpr (!(i & DrawType::Fill))
-		{
-			innerColor = Color{ 0x0 };
-		}
-	}
-
-	Impl::drawRectInternal(buffer, innerRect, innerColor);
-}
+};
